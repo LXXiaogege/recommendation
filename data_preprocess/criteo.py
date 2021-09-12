@@ -9,6 +9,15 @@ from sklearn.model_selection import train_test_split
 
 
 def create_criteo_dataset(file, embed_dim=8, read_part=True, sample_num=100000, test_size=0.2):
+    """
+
+    :param file: 训练集文件路径
+    :param embed_dim:  特征维度
+    :param read_part: Bool是否读取一部分数据
+    :param sample_num:  如果read_part=True读取样本数
+    :param test_size: float测试集占比
+    :return:
+    """
     names = ['label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11',
              'I12', 'I13', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11',
              'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C21', 'C22',
