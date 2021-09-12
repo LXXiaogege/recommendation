@@ -7,10 +7,11 @@ from sklearn.metrics import log_loss
 import lightgbm as lgb
 
 
-def data_proprecess():
+def data_preprocess():
     """
     因为测试集没有Label所以可以忽略。。在这里没什么用，原本是提交结果到Kaggle的
 
+    dataset：criteo dataset sample 只用了一部分数据集,源数据集11G
     Data Filed：
               ID， 广告id
               Label,是否被点击
@@ -184,7 +185,7 @@ def gbdt_lr(data, continuous_feature, category_feature):
 
 
 if __name__ == '__main__':
-    data = data_proprecess()
+    data = data_preprocess()
     continuous_feature = ['I'] * 13
     continuous_feature = [col + str(i + 1) for i, col in enumerate(continuous_feature)]
 
