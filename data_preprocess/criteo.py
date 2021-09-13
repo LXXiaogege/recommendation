@@ -18,24 +18,23 @@ def create_criteo_dataset(file, embed_dim=8, read_part=True, sample_num=100000, 
     :param test_size: float测试集占比
     :return:
     """
-    names = ['label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11',
-             'I12', 'I13', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11',
-             'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C21', 'C22',
-             'C23', 'C24', 'C25', 'C26']
+    names = ['label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1', 'C2',
+             'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
+             'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
     if read_part:
         # iterator:返回TextFileReader对象，迭代获取块 chunks,names列名
-        tfr = pd.read_csv(file, seq='\t', header=None, iterator=True, names=names)
+        tfr = pd.read_csv(file, sep='\t', header=None, iterator=True, names=names)
         data = tfr.get_chunk(sample_num)
     else:
-        data = pd.read_csv(file, seq='\t', header=None, names=names)
+        data = pd.read_csv(file, sep='\t', header=None, names=names)
 
-    continue_features = {'I' + str(i) for i in range(1, 14)}  # 连续特征
-    sparse_features = {'C' + str(i) for i in range(1, 27)}  # 离散特征
+    continue_features = ['I' + str(i) for i in range(1, 14)]  # 连续特征
+    sparse_features = ['C' + str(i) for i in range(1, 27)]  # 离散特征
     features = continue_features + sparse_features
 
     print("填充特征空字段")
-    data = data[continue_features].fillna(0)
-    data = data[sparse_features].fillna(-1)
+    data[continue_features] = data[continue_features].fillna(0)
+    data[sparse_features] = data[sparse_features].fillna('-1')  # 要填成字符类型确保为离散数据，如果填成int，后面则无法对他编码
 
     # 连续特征离散化(分箱),n_bins：离散后的桶个数，encode:编码方式，strategy:分箱的策略
     est = KBinsDiscretizer(n_bins=100, encode='ordinal', strategy='uniform')
