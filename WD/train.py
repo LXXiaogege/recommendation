@@ -1,6 +1,12 @@
 import os
+
+from keras.callbacks import EarlyStopping
+
 from data_preprocess.criteo import create_criteo_dataset
 from model import WideDeep
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import binary_crossentropy
+
 # 设置一个环境变量
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -29,3 +35,15 @@ if __name__ == '__main__':
     # GPU分布式训练 参考源代码。先不实现
 
     model = WideDeep(feature_columns, hidden_units_num=hidden_units_num, dnn_dropout=dnn_dropout)
+    model.summary()
+
+    # metrics: 模型评价指标
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss=binary_crossentropy, metrics=['accuracy'])
+
+    # callbacks()回调函数，在训练过程中某些点进行调用
+    # EarlyStopping在没有改善时停止训练
+    model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
+              callbacks=[EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)], validation_split=0.1
+              )
+
+    print('test AUC: %f' % model.evaluate(X_test, y_test, batch_size=batch_size)[1])

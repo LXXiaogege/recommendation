@@ -37,5 +37,6 @@ class WideDeep(Model):
     def call(self, inputs, **kwargs):
         """
         实现网络向前传播，相当于 torch中的forward函数
+        在调用fit函数
         :return:
         """
