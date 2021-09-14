@@ -1,7 +1,7 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Embedding, Dense
 from tensorflow.keras.regularizers import l2
-from modules import Deep
+from modules import Deep, Wide
 
 
 class WideDeep(Model):
@@ -30,10 +30,12 @@ class WideDeep(Model):
             self.feature_length += feat['feat_num']
 
         self.dnn_network = Deep(hidden_units_num, dnn_dropout)
+        self.linear = Wide(self.feature_length, embed_reg)
+
+        self.final_dense = Dense(1, activation=None)
 
     def call(self, inputs, **kwargs):
         """
         实现网络向前传播，相当于 torch中的forward函数
         :return:
         """
-        pass
