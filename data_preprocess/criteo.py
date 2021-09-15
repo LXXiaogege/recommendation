@@ -41,13 +41,14 @@ def create_criteo_dataset(file, embed_dim=8, read_part=True, sample_num=100000, 
     data[continue_features] = est.fit_transform(data[continue_features])
 
     # 离散数据编码 （数字编码），  离散数据无大小意义可用ont-hot编码，有大小意义选择数字编码LabelEncoder、OrdinalEncoder等
-    for feat in data[sparse_features]:
+    for feat in sparse_features:
         le = LabelEncoder()
         data[feat] = le.fit_transform(data[feat])
 
     # 因为连续数据也已经转化为了离散型，因此全使用sparse_faeture_dict建立信息字典
-    feature_column = [sparse_faeture_dict(feat_name=feat, feat_num=int(data[feat].max()), embed_dim=embed_dim) for feat
-                      in features]
+    # feat_num,LabelEncoder编码后的特征是从0开始往后整数算的，所以需要+1 ！！！
+    feature_column = [sparse_faeture_dict(feat_name=feat, feat_num=int(data[feat].max()) + 1, embed_dim=embed_dim)
+                      for feat in features]
 
     #  test这里其实是作为验证集
     train, test = train_test_split(data, test_size=test_size)

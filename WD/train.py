@@ -1,6 +1,7 @@
 import os
 
 from keras.callbacks import EarlyStopping
+from keras.metrics import AUC
 
 from data_preprocess.criteo import create_criteo_dataset
 from model import WideDeep
@@ -32,13 +33,15 @@ if __name__ == '__main__':
                                                                                   read_part=read_part,
                                                                                   sample_num=sample_num,
                                                                                   test_size=test_size)
+    print("X_train", X_train.shape)
+
     # GPU分布式训练 参考源代码。先不实现
 
     model = WideDeep(feature_columns, hidden_units_num=hidden_units_num, dnn_dropout=dnn_dropout)
-    model.summary()
+    # model.summary()
 
-    # metrics: 模型评价指标
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss=binary_crossentropy, metrics=['accuracy'])
+    # compile():为训练做配置 ,metrics: 模型评价指标
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss=binary_crossentropy, metrics=[AUC()])
 
     # callbacks()回调函数，在训练过程中某些点进行调用
     # EarlyStopping在没有改善时停止训练

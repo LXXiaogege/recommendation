@@ -33,10 +33,10 @@ class Wide(Layer):
                                  regularizer=l2(self.w_reg),
                                  trainable=True)
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs, **kwargs):
         # 为什么这样实现？？？？？？？
         # reduce_sum()计算tensor各维度之和
-        result = tf.reduce_sum(tf.nn.embedding_lookup(self.w, inputs, ), axis=1)
+        result = tf.reduce_sum(tf.nn.embedding_lookup(self.w, inputs), axis=1)
         return result
 
 
@@ -46,7 +46,7 @@ class Deep(Layer):
     只有全连接层组成
     """
 
-    def __init__(self, hidden_units_num, dropout, activation='relu'):
+    def __init__(self, hidden_units_num, dropout=0., activation='relu'):
         """
 
         :param hidden_units_num: 隐藏层个数
@@ -54,12 +54,12 @@ class Deep(Layer):
         :param activation: 激活函数，论文中是 relu，修正线性单元
         """
         super(Deep, self).__init__()
-        self.hidden_layers = [Dense(utils, activation=activation, use_bias=True) for utils in hidden_units_num]
+        self.hidden_layers = [Dense(utils, activation=activation) for utils in hidden_units_num]
         self.dropout = Dropout(dropout)
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs, **kwargs):
         x = inputs
         for h_layer in self.hidden_layers:
             x = h_layer(x)
-            x = self.dropout(x)
+        x = self.dropout(x)
         return x
