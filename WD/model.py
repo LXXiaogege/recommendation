@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Embedding, Dense, Input
 from tensorflow.keras.regularizers import l2
-from modules import Deep, Wide
+from .modules import Deep, Wide
 
 
 class WideDeep(Model):

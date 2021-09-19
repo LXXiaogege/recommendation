@@ -4,7 +4,7 @@ from keras.callbacks import EarlyStopping
 from keras.metrics import AUC
 
 from data_preprocess.criteo import create_criteo_dataset
-from model import WideDeep
+from .model import WideDeep
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import binary_crossentropy
 
