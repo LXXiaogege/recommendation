@@ -33,7 +33,6 @@ if __name__ == '__main__':
                                                                                   read_part=read_part,
                                                                                   sample_num=sample_num,
                                                                                   test_size=test_size)
-    print("X_train", X_train.shape)
 
     # GPU分布式训练 参考源代码。先不实现
 

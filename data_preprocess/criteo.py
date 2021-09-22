@@ -4,7 +4,7 @@ Dataset download ： https://ailab.criteo.com/ressources/
 """
 import pandas as pd
 from sklearn.preprocessing import KBinsDiscretizer, LabelEncoder
-from data_preprocess.utils import sparse_faeture_dict
+from data_preprocess.criteo_utils import sparse_faeture_dict
 from sklearn.model_selection import train_test_split
 
 
