@@ -50,8 +50,6 @@ class WideDeep(Model):
         # 39*8 = 312 最后得到 spares_embed shape : (None,312)
         sparse_embed = tf.concat([self.embed['embed_{}'.format(i)](inputs[:, i])
                                   for i in range(inputs.shape[1])], axis=-1)
-        # sparse_embed = tf.concat([self.embed['embed_{}'.format(i)](inputs[:, i]) for i in range(inputs.shape[1])],
-        #                          axis=-1)
 
         x = sparse_embed  # shape : (batch_size, field * embed_dim)
 
@@ -59,9 +57,10 @@ class WideDeep(Model):
         deep_outputs = self.dnn_network(x)
         deep_outputs = self.final_dense(deep_outputs)
 
-        # wide ???
+        # wide
+        # 相加是把每个特征离散值，做成一个统一的整体特征，
+        # 例如 年龄（0，1，2，3，4，5），性别(0，1）对于某个用户，年龄4，性别1，在整体的linear regression上，他两个特征的序号为4，7。
         wide_inputs = inputs + tf.convert_to_tensor(self.index_mapping)  # list to tensor
-        # print("wide_inputs", wide_inputs)
         wide_output = self.linear(wide_inputs)
 
         # joint
@@ -69,5 +68,10 @@ class WideDeep(Model):
         return result
 
     # def summary(self, **kwargs):
+    #     """
+    #     打印Network摘要summary
+    #     :param kwargs:
+    #     :return:
+    #     """
     #     sparse_inputs = Input(shape=(len(self.sparse_feature_columns),), dtype=tf.int32)
     #     Model(inputs=sparse_inputs, outputs=self.call(sparse_inputs)).summary()

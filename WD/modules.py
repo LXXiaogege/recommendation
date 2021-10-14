@@ -13,7 +13,6 @@ class Wide(Layer):
 
     def __init__(self, feature_length, w_reg=1e-6):
         """
-
         :param feature_length: 特征长度
         :param w_reg:
         """
@@ -34,9 +33,9 @@ class Wide(Layer):
                                  trainable=True)
 
     def call(self, inputs, **kwargs):
-        # 为什么这样实现？？？？？？？
-        # reduce_sum()计算tensor各维度之和
-        result = tf.reduce_sum(tf.nn.embedding_lookup(self.w, inputs), axis=1)
+        # result shape : (batch_size,1)
+        # 通过inputs来查找weight，对每个batch的weight求和
+        result = tf.reduce_sum(tf.nn.embedding_lookup(params=self.w, ids=inputs), axis=1)  # reduce_sum()计算tensor各维度之和
         return result
 
 

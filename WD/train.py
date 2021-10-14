@@ -44,9 +44,10 @@ if __name__ == '__main__':
     model.compile(optimizer=Adam(learning_rate=learning_rate), loss=binary_crossentropy, metrics=[AUC()])
 
     # callbacks()回调函数，在训练过程中某些点进行调用
-    # EarlyStopping在没有改善时停止训练
+    # EarlyStopping在没有改善时停止训练，实际训练的epochs <= 超参数设置的epochs
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
               callbacks=[EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)], validation_split=0.1
               )
 
     print('test AUC: %f' % model.evaluate(X_test, y_test, batch_size=batch_size)[1])
+    model.summary()
