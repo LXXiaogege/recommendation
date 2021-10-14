@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Embedding, Dense, Input
+from tensorflow.keras.layers import Embedding, Dense
 from tensorflow.keras.regularizers import l2
-from modules import Deep, Wide
+from .modules import Deep, Wide
 
 
 class WideDeep(Model):
@@ -10,7 +10,7 @@ class WideDeep(Model):
         """
 
         :param feature_columns: 特征信息
-        :param hidden_units_num:  隐藏层个数
+        :param hidden_units_num:  Deep部分隐藏层个数，自定义
         :param dnn_dropout: DNN部分dropout
         :param embed_reg: embedding regularizer 参数初始化
         """
@@ -18,7 +18,8 @@ class WideDeep(Model):
         self.sparse_feature_columns = feature_columns
 
         # input_dim : vocabulary size,output_dim: embed_dim,
-        # input_length ??????????????
+        # input_length ：相当于在embedding前加了一个 input层，input object,应该相当于torch中linear中的in_features
+        # 对每个特征都进行一个embedding，得到每个特征的embed_i稠密向量
         self.embed = {
             'embed_' + str(i): Embedding(input_dim=feat['feat_num'],
                                          input_length=1,
@@ -28,7 +29,9 @@ class WideDeep(Model):
             for i, feat in enumerate(self.sparse_feature_columns)
         }
 
+        # index_mapping作为wide part的embedding_lookup的索引ids
         self.index_mapping = []
+        # 所有特征feat_num之和
         self.feature_length = 0
         for feat in self.sparse_feature_columns:
             self.index_mapping.append(self.feature_length)
@@ -47,7 +50,7 @@ class WideDeep(Model):
         """
 
         # self.embed['embed_' + str(i)](inputs[:, 1]) 得到的是每个特征的tensor表示，一共39个，把这些tensor拼接起来（特征拼接）因为每个特征dim为8
-        # 39*8 = 312 最后得到 spares_embed shape : (None,312)
+        # 39*8 = 312 最后得到 spares_embed shape : (None,312)  （batch_size,field*embed_dim）
         sparse_embed = tf.concat([self.embed['embed_{}'.format(i)](inputs[:, i])
                                   for i in range(inputs.shape[1])], axis=-1)
 

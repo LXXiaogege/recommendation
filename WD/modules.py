@@ -9,6 +9,7 @@ import tensorflow as tf
 class Wide(Layer):
     """
     Wide Component。 Linear part（线性模型）,  需要手动特征工程
+    这里是做了特征加和，有的实现是直接对特征原封不动，还有的做了交叉相乘。有多种不同策略
     """
 
     def __init__(self, feature_length, w_reg=1e-6):

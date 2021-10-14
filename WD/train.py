@@ -4,7 +4,7 @@ from keras.callbacks import EarlyStopping
 from keras.metrics import AUC
 
 from data_preprocess.criteo import create_criteo_dataset
-from model import WideDeep
+from .model import WideDeep
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import binary_crossentropy
 
@@ -33,7 +33,6 @@ if __name__ == '__main__':
                                                                                   read_part=read_part,
                                                                                   sample_num=sample_num,
                                                                                   test_size=test_size)
-    print("X_train", X_train.shape)
 
     # GPU分布式训练 参考源代码。先不实现
 
