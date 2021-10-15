@@ -46,15 +46,17 @@ reviews_df = reviews_df[['reviewerID', 'asin', 'unixReviewTime']]
 # meta
 meta_df = pd.read_pickle(r'D:\data\amazon_electronics\meta.pkl')
 meta_df = meta_df[['asin', 'categories']]
-# 类别只保留最后一个
+# 一个商品有多个category，只保留最后一个,
 meta_df['categories'] = meta_df['categories'].map(lambda x: x[-1][-1])
 
-# meta_df文件的物品ID映射
+# 建立meta_df文件的物品ID映射，key为字典中asin的值
 asin_map, asin_key = build_map(meta_df, 'asin')
-# meta_df文件物品种类映射
+# meta_df文件物品种类映射,cate_key:category最后一个
 cate_map, cate_key = build_map(meta_df, 'categories')
-# reviews_df文件的用户ID映射
+# print(cate_map)
+# reviews_df文件的用户ID映射,revi_key:reviewerID
 revi_map, revi_key = build_map(reviews_df, 'reviewerID')
+# print(revi_map)
 
 # user_count: 192403	item_count: 63001	cate_count: 801	example_count: 1689188
 user_count, item_count, cate_count, example_count = \

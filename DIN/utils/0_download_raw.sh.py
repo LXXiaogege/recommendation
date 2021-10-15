@@ -35,7 +35,7 @@ reviewTime：评价时间
 
 
 
-meta_Electronics.json: product matedata(商品元数据)
+meta_Electronics.json: product metadata(商品元数据)
 
 字段：
 asin：产品id

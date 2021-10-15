@@ -1,5 +1,6 @@
 import pickle
 import pandas as pd
+import os
 
 
 def to_df(file_path):
@@ -18,15 +19,16 @@ def to_df(file_path):
         return df
 
 
-reviews_df = to_df(r"D:\data\amazon_electronics\Electronics_5.json")
+if not os.path.isfile(r'D:\data\amazon_electronics\reviews.pkl'):
+    reviews_df = to_df(r"D:\data\amazon_electronics\Electronics_5.json")
 
-# pickle保存持久化
-with open(r'D:\data\amazon_electronics\reviews.pkl', 'wb') as f:
-    pickle.dump(reviews_df, f, pickle.HIGHEST_PROTOCOL)
+    # pickle保存持久化
+    with open(r'D:\data\amazon_electronics\reviews.pkl', 'wb') as f:
+        pickle.dump(reviews_df, f, pickle.HIGHEST_PROTOCOL)
 
-meta_df = to_df(r"D:\data\amazon_electronics\meta_Electronics.json")
-meta_df = meta_df[meta_df['asin'].isin(reviews_df['asin'].unique())]
-meta_df = meta_df.reset_index(drop=True)  # 重置DataFrame的index
+    meta_df = to_df(r"D:\data\amazon_electronics\meta_Electronics.json")
+    meta_df = meta_df[meta_df['asin'].isin(reviews_df['asin'].unique())]
+    meta_df = meta_df.reset_index(drop=True)  # 重置DataFrame的index
 
-with open(r'D:\data\amazon_electronics\meta.pkl', 'wb') as f:
-    pickle.dump(meta_df, f, pickle.HIGHEST_PROTOCOL)
+    with open(r'D:\data\amazon_electronics\meta.pkl', 'wb') as f:
+        pickle.dump(meta_df, f, pickle.HIGHEST_PROTOCOL)
