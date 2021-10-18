@@ -20,4 +20,5 @@ if __name__ == '__main__':
     batch_size = 4096
     epochs = 5
 
-    create_amazon_electronic_dataset(file, embed_dim, maxlen)
+    feature_columns, behavior_list, (train_X, train_y), (val_X, val_y), (
+    test_X, test_y) = create_amazon_electronic_dataset(file, embed_dim, maxlen)
