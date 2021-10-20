@@ -66,28 +66,34 @@ def create_amazon_electronic_dataset(file, embed_dim, maxlen):
 
         """
         正样本label为1，负样本label为0
+        生成训练集、测试集、验证集，每个用户所有浏览的物品（共n个）前n-2个为训练集（正样本），并生成相应的负样本，
+        每个用户共有n-3个训练集（第1个无浏览历史），第n个作为测试集。第n-1个作为验证集。
+        数据集结构：[hist_i(历史记录序列),[pos_list[i](要预测的下一个浏览记录)，cate_list[pos_list[i]]](要预测的下一个浏览记录的类别)，1/0(正负样本标签))
         """
         hist = []  # 该用户的history，user评价过的商品id
         for i in range(1, len(pos_list)):
+            # hist 生成每一次的浏览记录，即之前的浏览历史。
             hist.append([pos_list[i - 1], cate_list[pos_list[i - 1]]])  # hist: [[pos item id,item cate ]] 二维数组
             hist_i = hist.copy()  # 浅拷贝
-            if i == len(pos_list) - 1:  # 把每个用户的历史序列倒数第二个当做test data
+            if i == len(pos_list) - 1:
                 test_data.append([hist_i, [pos_list[i], cate_list[pos_list[i]]], 1])
                 test_data.append([hist_i, [neg_list[i], cate_list[neg_list[i]]], 0])
-            elif i == len(pos_list) - 2:  #
+            elif i == len(pos_list) - 2:
                 val_data.append([hist_i, [pos_list[i], cate_list[pos_list[i]]], 1])
                 val_data.append([hist_i, [neg_list[i], cate_list[neg_list[i]]], 0])
             else:
+
                 train_data.append([hist_i, [pos_list[i], cate_list[pos_list[i]]], 1])
                 train_data.append([hist_i, [neg_list[i], cate_list[neg_list[i]]], 0])
 
     """
     得到feature_columns：无密集数据，稀疏数据为item_id和cate_id；
     """
-    # feature columns,
+    # feature columns: [dense_features,sparse_features]
     feature_columns = [[],
                        [sparseFeature('item_id', item_count, embed_dim),
                         ]]  # sparseFeature('cate_id', cate_count, embed_dim)
+    print("feature_columns", feature_columns)
 
     """
     生成用户行为列表，方便后续序列Embedding的提取，在此处，即item_id, cate_id；

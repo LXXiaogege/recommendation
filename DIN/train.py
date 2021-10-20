@@ -1,5 +1,6 @@
 import os
 from data_preprocess.amazon_electronic_utils import create_amazon_electronic_dataset
+from DIN.model import DIN
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = '6'
@@ -21,4 +22,9 @@ if __name__ == '__main__':
     epochs = 5
 
     feature_columns, behavior_list, (train_X, train_y), (val_X, val_y), (
-    test_X, test_y) = create_amazon_electronic_dataset(file, embed_dim, maxlen)
+        test_X, test_y) = create_amazon_electronic_dataset(file, embed_dim, maxlen)
+    model = DIN(feature_columns, behavior_list, att_hidden_units, ffn_hidden_units, att_activation,
+                ffn_activation, maxlen, dnn_dropout)
+
+
+
