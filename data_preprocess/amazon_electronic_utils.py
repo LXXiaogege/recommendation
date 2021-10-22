@@ -82,7 +82,6 @@ def create_amazon_electronic_dataset(file, embed_dim, maxlen):
                 val_data.append([hist_i, [pos_list[i], cate_list[pos_list[i]]], 1])
                 val_data.append([hist_i, [neg_list[i], cate_list[neg_list[i]]], 0])
             else:
-
                 train_data.append([hist_i, [pos_list[i], cate_list[pos_list[i]]], 1])
                 train_data.append([hist_i, [neg_list[i], cate_list[neg_list[i]]], 0])
 
@@ -93,12 +92,11 @@ def create_amazon_electronic_dataset(file, embed_dim, maxlen):
     feature_columns = [[],
                        [sparseFeature('item_id', item_count, embed_dim),
                         ]]  # sparseFeature('cate_id', cate_count, embed_dim)
-    print("feature_columns", feature_columns)
 
     """
     生成用户行为列表，方便后续序列Embedding的提取，在此处，即item_id, cate_id；
     """
-    # behavior
+    # behavior , behavior_list单独抽出来为了做target attention之类的用户行为序列建模
     behavior_list = ['item_id']  # , 'cate_id'
 
     # shuffle
