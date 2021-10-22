@@ -57,7 +57,8 @@ class DIN(Model):
         # item_inputs (None,len(hist[i]))
         dense_inputs, sparse_inputs, seq_inputs, item_inputs = inputs
 
-        # attention ---> mask, if the element of seq_inputs is equal 0, it must be filled in.  ???
+        # attention ---> mask, if the element of seq_inputs is equal 0, it must be filled in.
+        # 因为在用pad_sequences填history seq时默认用0做的padding，所以只需要看第一个元素是否为0
         mask = tf.cast(tf.not_equal(seq_inputs[:, :, 0], 0),
                        dtype=tf.float32)  # (None, maxlen), cast()数据类型转换。bool转换为float类型，False->0.,True->1.
 
