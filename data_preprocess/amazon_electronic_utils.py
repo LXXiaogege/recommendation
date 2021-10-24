@@ -54,7 +54,7 @@ def create_amazon_electronic_dataset(file, embed_dim, maxlen):
 
         def gen_neg():
             """
-            随机生成一个负样本
+            随机生成一个负样本，根据数据还有业务需求来设计正负样本生成比例和方式。
             :return:
             """
             neg = pos_list[0]
