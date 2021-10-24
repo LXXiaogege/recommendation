@@ -1,7 +1,7 @@
 from keras.regularizers import l2
 from tensorflow.keras import Model
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout
+from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout,PReLU
 from .modules import Attention, Dice
 
 
@@ -52,7 +52,7 @@ class DIN(Model):
 
         self.bn = BatchNormalization(trainable=True)
 
-        self.ffn = [Dense(units=units, activation='prelu' if ffn_activation == 'prelu' else Dice())
+        self.ffn = [Dense(units=units, activation=PReLU() if ffn_activation == 'prelu' else Dice())
                     for units in ffn_hidden_units]
 
         self.dropout = Dropout(dnn_dropout)
@@ -70,7 +70,7 @@ class DIN(Model):
         mask = tf.cast(tf.not_equal(seq_inputs[:, :, 0], 0),
                        dtype=tf.float32)  # (None, maxlen), cast()数据类型转换。bool转换为float类型，False->0.,True->1.
 
-        # other
+        # other, dense_features直接拼接不需要embedding，除了seq, target features的sparse_features需要进行embedding
         other_info = dense_inputs
         for i in range(self.other_sparse_len):
             other_info = tf.concat([other_info, self.embed_sparse_layers[i](sparse_inputs[:, i])], axis=-1)
@@ -79,14 +79,14 @@ class DIN(Model):
         # seq_inputs[:, :, i] shape: (None,maxlen) ,embedding input：2D tensor with shape: (batch_size, input_length)
         # self.embed_seq_layers[i](seq_inputs[:, :, i]).shape： (None,maxlen,embed_dim)
         # seq_embed : (None,maxlen,embed_dim*behavior_num)
-        seq_embed = tf.concat([self.seq_embedding_layer[i](seq_inputs[0, 0, i])
+        seq_embed = tf.concat([self.seq_embedding_layer[i](seq_inputs[:, :, i])
                                for i in range(self.behavior_len)], axis=-1)
         # target embedding
         # target_embed:(None,embed_dim*behavior_num)
-        target_embed = tf.concat([self.seq_embedding_layer[i](item_inputs[0, i])
+        target_embed = tf.concat([self.seq_embedding_layer[i](item_inputs[:, i])
                                   for i in range(self.behavior_len)], axis=-1)
         # attention :query , key , value mask
-        user_info = self.attention_layer(target_embed, seq_embed, seq_embed, mask)
+        user_info = self.attention_layer([target_embed, seq_embed, seq_embed, mask])
 
         if self.dense_len > 0 or self.other_sparse_len > 0:
             info_all = tf.concat([user_info, target_embed, other_info], axis=-1)
