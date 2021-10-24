@@ -1,8 +1,8 @@
 from keras.regularizers import l2
 from tensorflow.keras import Model
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding
-from .modules import Attention
+from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout
+from .modules import Attention, Dice
 
 
 class DIN(Model):
@@ -50,6 +50,14 @@ class DIN(Model):
                                        if feat in behavior_feature_list]
         self.attention_layer = Attention(att_hidden_units=att_hidden_units, activation=att_activation)
 
+        self.bn = BatchNormalization(trainable=True)
+
+        self.ffn = [Dense(units=units, activation='prelu' if ffn_activation == 'prelu' else Dice())
+                    for units in ffn_hidden_units]
+
+        self.dropout = Dropout(dnn_dropout)
+        self.dense_final = Dense(1)
+
     def call(self, inputs, training=None, mask=None):
         # dense_inputs :连续特征， sparse_inputs: 离散特征， seq_inputs:user behavior history， item_inputs: target
         # dense_inputs and sparse_inputs is empty.
@@ -85,3 +93,12 @@ class DIN(Model):
         else:
             info_all = tf.concat([user_info, target_embed], axis=-1)
 
+        info_all = self.bn(info_all)
+
+        for fc in self.ffn:
+            info_all = fc(info_all)
+
+        info_all = self.dropout(info_all)
+        outputs = tf.nn.sigmoid(self.dense_final(info_all))
+
+        return outputs
