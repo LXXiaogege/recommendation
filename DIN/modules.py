@@ -62,9 +62,13 @@ class Attention(Layer):
 class Dice(Layer):
     """
     Data Adaptive Activation Function
-    当每层的输入有不同分布时，因为PRelu会不稳定，
-    Dice可以被看作是PReLu的一般化。Dice的核心思想是根据输入数据的分布自适应地调整修正点，其值设为输入数据的均值。
-    此外，Dice控制流畅，可在两个通道之间切换。当E(s) = 0, V ar[s] = 0时，Dice退化为PReLU
+
+    解决问题： ICS(Internal Covariate Shift):训练数据在经过网络的每一层后其分布都发生了变化,一般解决方法有
+    1. Normalization
+    2. batch Norm
+    3. 自适应激活函数
+    Normalization,batch Norm是通过更改数据分布来适应激活函数，自适应激活函数是让激活函数去适应数据分布
+    https://www.bilibili.com/video/BV1zK4y137Se?p=4
     """
 
     def __init__(self, ):
