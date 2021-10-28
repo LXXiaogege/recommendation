@@ -1,8 +1,8 @@
 from keras.regularizers import l2
 from tensorflow.keras import Model
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout,PReLU
-from .modules import Attention, Dice
+from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout, PReLU
+from DIN.modules import Attention, Dice
 
 
 class DIN(Model):

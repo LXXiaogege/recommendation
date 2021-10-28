@@ -42,7 +42,12 @@ class Attention(Layer):
         # outputs (None,maxlen,1)
         outputs = self.att_final_dense(info)
 
-        "mask"
+        """
+        mask
+        因为这些填充的位置，其实是没什么意义的，所以attention机制不应该把注意力放在这些位置上，需要进行一些处理。
+        具体的做法是，把这些位置的值加上一个非常大的负数(负无穷)，这样的话，经过 softmax，这些位置的概率就会接近0！
+        而我们的 padding mask 实际上是一个张量，每个值都是一个Boolean，值为 false 的地方就是我们要进行处理的地方。
+        """
         # outputs (None,maxlen)
         outputs = tf.squeeze(input=outputs, axis=-1)
         paddings = tf.ones_like(input=outputs) * (
