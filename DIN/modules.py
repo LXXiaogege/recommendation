@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Layer, Dense, BatchNormalization
+from tensorflow.keras.layers import Layer, Dense, BatchNormalization, PReLU
 
 
 class Attention(Layer):
@@ -10,7 +10,7 @@ class Attention(Layer):
     def __init__(self, att_hidden_units, activation='prelu'):
         super().__init__()
         # 论文中的 a() 前向反馈网络
-        self.att_dense = [Dense(units=unit, activation=activation) for unit in att_hidden_units]
+        self.att_dense = [Dense(units=unit, activation=PReLU()) for unit in att_hidden_units]
         self.att_final_dense = Dense(1)
 
     def call(self, inputs):
