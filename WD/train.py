@@ -4,7 +4,7 @@ from keras.callbacks import EarlyStopping
 from keras.metrics import AUC
 
 from data_preprocess.criteo import create_criteo_dataset
-from .model import WideDeep
+from WD.model import WideDeep
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import binary_crossentropy
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     hidden_units_num = [256, 128, 64]
     learning_rate = 0.001
     batch_size = 4096
-    epochs = 10
+    epochs = 100
 
     feature_columns, (X_train, y_train), (X_test, y_test) = create_criteo_dataset(file=file, embed_dim=embed_dim,
                                                                                   read_part=read_part,
