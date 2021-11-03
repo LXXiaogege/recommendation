@@ -17,7 +17,7 @@ class Attention(Layer):
         """
 
         :param inputs:
-        :return:
+        :return: attention value
         """
 
         # query:candidate item  (None,embed_dim*behavior_num)
@@ -48,16 +48,18 @@ class Attention(Layer):
         具体的做法是，把这些位置的值加上一个非常大的负数(负无穷)，这样的话，经过 softmax，这些位置的概率就会接近0！
         而我们的 padding mask 实际上是一个张量，每个值都是一个Boolean，值为 false 的地方就是我们要进行处理的地方。
         """
-        # outputs (None,maxlen)
+        # outputs (None,maxlen) :attention score
         outputs = tf.squeeze(input=outputs, axis=-1)
         paddings = tf.ones_like(input=outputs) * (
                 -2 ** 32 + 1)  # tf.ones_like复制一个与input shape一样全为一的tensor,(-2 ** 32 + 1)为float32为能存储的最大数值
         # 把mask中为0的置为-2 ** 32 + 1，否则置为outputs中的对应元素
         outputs = tf.where(condition=tf.equal(mask, 0), x=paddings, y=outputs)
 
-        # softmax，论文中说不实现，但代码中却实现了（无所谓不是DIN的重点）
+        # softmax，attention score 归一化
         outputs = tf.nn.softmax(logits=outputs)
         outputs = tf.expand_dims(input=outputs, axis=1)
+
+        # 对value加权求和,得到attention value
         outputs = tf.matmul(outputs, v)
         outputs = tf.squeeze(input=outputs, axis=1)  # (None,embed_dim*behavior_num)
 
