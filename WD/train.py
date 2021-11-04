@@ -1,7 +1,7 @@
 import os
 
-from keras.callbacks import EarlyStopping
-from keras.metrics import AUC
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.metrics import AUC
 
 from data_preprocess.criteo import create_criteo_dataset
 from WD.model import WideDeep

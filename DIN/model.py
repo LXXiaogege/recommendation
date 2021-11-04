@@ -1,4 +1,4 @@
-from keras.regularizers import l2
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras import Model
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Dense, BatchNormalization, Dropout, PReLU
