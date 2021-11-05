@@ -149,6 +149,5 @@ class Attention(Layer):
         # 归一化
         outputs = tf.nn.softmax(logits=outputs)
         outputs = tf.expand_dims(input=outputs, axis=1)
-        print(outputs.shape)
 
         return outputs
