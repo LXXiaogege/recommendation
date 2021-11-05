@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.callbacks import EarlyStopping
 
 from Word2Vec.model import Word2Vec
 from tensorflow.keras.losses import CategoricalCrossentropy
@@ -55,15 +56,6 @@ def get_negatives(all_contexts, sampling_weights, k):
                 negatives.append(neg)
         all_negatives.append(negatives)
     return all_negatives
-
-
-def batchify(data):
-    """
-    小批量读取函数
-    :param data:
-    :return:
-    """
-    max_len = max(len(c) + len(n) for _, c, n in data)
 
 
 if __name__ == '__main__':
@@ -121,22 +113,23 @@ if __name__ == '__main__':
         if max_len < len(i) + len(j):
             max_len = len(i) + len(j)
 
-    masks = []
     for center, positives, negatives in zip(all_centers, all_contexts, all_negatives):
         pos_num = len(positives)
         positives.extend(negatives)
         all_num = len(positives)
         labels = [1] * pos_num
-        masks.append([1] * all_num)
-        train_dataset.append([center, positives, labels])
-    masks = pad_sequences(masks, maxlen=max_len)
+        mask = [1] * all_num
+        train_dataset.append([center, positives, labels, mask])
 
-    train_dataset = pd.DataFrame(data=train_dataset, columns=["center", "context_neg", "label"])
+    train_dataset = pd.DataFrame(data=train_dataset, columns=["center", "context_neg", "label", "mask"])
 
     train_data, test_data = train_test_split(train_dataset, test_size=0.2, shuffle=True)
-    train_X = [np.array(train_data['center']), pad_sequences(np.array(train_data['context_neg']), maxlen=max_len)]
+
+    train_X = [np.array(train_data['center']), pad_sequences(np.array(train_data['context_neg']), maxlen=max_len),
+               pad_sequences(np.array(train_data['mask']), maxlen=max_len)]
     train_y = pad_sequences(train_data['label'], maxlen=max_len)
-    test_X = [np.array(test_data['center']), pad_sequences(np.array(test_data['context_neg']), maxlen=max_len)]
+    test_X = [np.array(test_data['center']), pad_sequences(np.array(test_data['context_neg']), maxlen=max_len),
+              pad_sequences(np.array(test_data['mask']), maxlen=max_len)]
     test_y = pad_sequences(test_data['label'], maxlen=max_len)
 
     batch_size = 64
@@ -145,9 +138,11 @@ if __name__ == '__main__':
     # dataset = tf.data.Dataset.from_tensor_slices((train_X, train_y))
     # dataset = dataset.batch(batch_size=batch_size, drop_remainder=True)
 
-    model = Word2Vec(vocab_size=len(idx_to_token), embedding_dim=embedding_dim, mask=masks)
+    model = Word2Vec(vocab_size=len(idx_to_token), embedding_dim=embedding_dim)
     model.compile(optimizer='adam', loss=CategoricalCrossentropy(from_logits=True), metrics=AUC())
     # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="logs")
     # model.fit(dataset, validation_data=(test_X, test_y), epochs=20, callbacks=[tensorboard_callback],
     #           batch_size=batch_size)
-    model.fit(x=train_X, y=train_y, validation_data=(test_X, test_y), epochs=20, batch_size=batch_size)
+
+    model.fit(x=train_X, y=train_y, validation_data=(test_X, test_y), epochs=20, batch_size=batch_size,
+              callbacks=[EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)])

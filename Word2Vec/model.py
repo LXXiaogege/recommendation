@@ -8,9 +8,8 @@ class Word2Vec(Model):
     word2vec : skip-gram model
     """
 
-    def __init__(self, vocab_size, embedding_dim, mask):
+    def __init__(self, vocab_size, embedding_dim):
         super().__init__()
-        self.mask = mask
 
         # center,context embedding也可以共用一个embedding layer
 
@@ -22,13 +21,19 @@ class Word2Vec(Model):
 
     def call(self, inputs):
         # inputs : train_X
-        # center (None,),  context: (None,max_len)
-        center, context = inputs
+        # center (None,),  context: (None,max_len), mask:(None,max_len)
+        center, context, mask = inputs
         center_embedded = self.center_embedding(center)
         context_embedded = self.context_embedding(context)
 
         # outputs； (None,1,max_len)
         outputs = tf.matmul(center_embedded, tf.transpose(context_embedded, perm=[0, 2, 1]))
         outputs = tf.squeeze(outputs, axis=1)  # (None,max_len)
+
+        # mask
+        paddings = tf.ones_like(input=outputs) * (-2 ** 32 + 1)
+        outputs = tf.where(condition=tf.equal(mask, 0), x=paddings, y=outputs)
+
         outputs = tf.nn.softmax(outputs, axis=-1)
+
         return outputs
