@@ -8,9 +8,9 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.callbacks import EarlyStopping
 
 from Word2Vec.model import Word2Vec
-from tensorflow.keras.losses import CategoricalCrossentropy
+from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.metrics import AUC
-
+from tensorflow.keras.optimizers import Adam
 
 def get_center_and_context(dataset, max_window_size):
     """
@@ -139,10 +139,11 @@ if __name__ == '__main__':
     # dataset = dataset.batch(batch_size=batch_size, drop_remainder=True)
 
     model = Word2Vec(vocab_size=len(idx_to_token), embedding_dim=embedding_dim)
-    model.compile(optimizer='adam', loss=CategoricalCrossentropy(from_logits=True), metrics=AUC())
+    model.compile(optimizer=Adam(learning_rate=0.005), loss=BinaryCrossentropy(), metrics=AUC())
     # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="logs")
     # model.fit(dataset, validation_data=(test_X, test_y), epochs=20, callbacks=[tensorboard_callback],
     #           batch_size=batch_size)
 
     model.fit(x=train_X, y=train_y, validation_data=(test_X, test_y), epochs=20, batch_size=batch_size,
-              callbacks=[EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)])
+              callbacks=[EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)]
+              )

@@ -34,6 +34,6 @@ class Word2Vec(Model):
         paddings = tf.ones_like(input=outputs) * (-2 ** 32 + 1)
         outputs = tf.where(condition=tf.equal(mask, 0), x=paddings, y=outputs)
 
-        outputs = tf.nn.softmax(outputs, axis=-1)
+        outputs = tf.nn.sigmoid(outputs)
 
         return outputs
