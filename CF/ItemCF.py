@@ -1,4 +1,5 @@
 import math
+from operator import itemgetter
 
 import pandas as pd
 import numpy as np
@@ -57,43 +58,71 @@ def cal_movie_sim(train_data):
                 # similarly = 共现次数/根号下各自出现次数相乘
                 movie_sim_matrix[m1][m2] = count / math.sqrt(movie_popular[m1] * movie_popular[m2])
     print("相似度矩阵计算完成")
-    return movie_sim_matrix
+    return movie_sim_matrix, movie_count
 
 
-def evaluate(movie_sim_matrix, test_data, k):
+def recommend(user, train, n_sim_movie, n_rec_movie):
+    """
+    针对目标用户U，找到K部相似的电影，并推荐其N部电影，如果用户已经看过该电影则不推荐。
+    """
+    K = n_sim_movie
+    N = n_rec_movie
+    rank = {}
+    train_group = train.groupby('userId')
+    watched_movies = train_group.get_group(user)['movieId'].tolist()  # 用户看过的电影
+    rating = train_group.get_group(user)['rating'].tolist()
+    for movie, rate in zip(watched_movies, rating):
+        for related_movie, w in sorted(movie_sim_matrix[movie].items(), key=itemgetter(1), reverse=True)[:K]:
+            if related_movie in watched_movies:
+                continue
+            rank.setdefault(related_movie, 0)
+            rank[related_movie] += w * float(rate)
+    return sorted(rank.items(), key=itemgetter(1), reverse=True)[0:N]
+
+
+def evaluate(movie_sim_matrix, test_data, n_sim_movie, n_rec_movie,movie_count):
     """
     针对目标用户历史行为中的正反馈物品找出相似的k个物品
     """
-    inter = 0
-    all = 0
-    grouped = test_data.groupby('userId')
-    for index, group in grouped:
-        movies_seq = group.sort_values('timestamp')['movieId'].tolist()
-        spil_len = int(len(movies_seq)/2)
-        target_movie = movies_seq[-spil_len:]
-        for i in range(spil_len):
-            movies_seq.pop(-1)
-        cond_movies = []
-        for i in movies_seq:
-            if i in movie_sim_matrix.keys():  #
-                most_sim_movie = max(movie_sim_matrix[i], key=lambda x: movie_sim_matrix[i][x])
-                cond_movies.append(most_sim_movie)
-        if cond_movies is not None:
-            common_k = Counter(cond_movies).most_common(k)
-            finl_movies = [j[0] for j in common_k]
-            inter += len(list(set(target_movie).intersection(set(finl_movies))))  # 交集长度
-            all += len(finl_movies)
-    recall = inter / all
-    print("召回率：", recall)
+
+    print('Evaluating start ...')
+    N = n_rec_movie
+    # 准确率和召回率
+    hit = 0
+    rec_count = 0
+    test_count = 0
+    # 覆盖率
+    all_rec_movies = set()
+
+    test_grouped = test_data.groupby('userId')
+    train_grouped = train_data.groupby('userId')
+    for userId, group in train_grouped:
+        if userId not in test_data['userId']:
+            continue
+        real_seq = test_grouped.get_group(userId)['movieId'].tolist()
+        predict_seq = recommend(userId, train_data, n_sim_movie=n_sim_movie, n_rec_movie=n_rec_movie)
+
+        for movie in real_seq:
+            if movie in predict_seq:
+                hit += 1
+            all_rec_movies.add(movie)
+        rec_count += N
+        test_count += len(real_seq)
+
+    precision = hit / (1.0 * rec_count)
+    recall = hit / (1.0 * test_count)
+    coverage = len(all_rec_movies) / (1.0 * movie_count)
+    print('precisioin=%.4f\trecall=%.4f\tcoverage=%.4f' % (precision, recall, coverage))
 
 
 if __name__ == '__main__':
     rating_file = r"D:\data\ml-latest-small\ratings.csv"
-
+    # 候补
+    n_sim_movie = 20
     # 要推荐给用户的数目
-    rec_movies_num = 100
+    rec_movies_num = 10
 
     train_data, test_data = get_dataset(rating_file)
 
-    movie_sim_matrix = cal_movie_sim(train_data)
-    evaluate(movie_sim_matrix, test_data, rec_movies_num)
+    movie_sim_matrix, movie_count = cal_movie_sim(train_data)
+    evaluate(movie_sim_matrix, test_data, n_sim_movie, rec_movies_num,movie_count)
