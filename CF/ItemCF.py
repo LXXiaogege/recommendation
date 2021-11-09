@@ -3,7 +3,7 @@ import math
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics.pairwise import cosine_similarity
+from collections import Counter
 
 
 def get_dataset(file):
@@ -60,20 +60,40 @@ def cal_movie_sim(train_data):
     return movie_sim_matrix
 
 
-def evaluate(movie_sim_matrix, test_data):
-    pass
+def evaluate(movie_sim_matrix, test_data, k):
+    """
+    针对目标用户历史行为中的正反馈物品找出相似的k个物品
+    """
+    inter = 0
+    all = 0
+    grouped = test_data.groupby('userId')
+    for index, group in grouped:
+        movies_seq = group.sort_values('timestamp')['movieId'].tolist()
+        spil_len = int(len(movies_seq)/2)
+        target_movie = movies_seq[-spil_len:]
+        for i in range(spil_len):
+            movies_seq.pop(-1)
+        cond_movies = []
+        for i in movies_seq:
+            if i in movie_sim_matrix.keys():  #
+                most_sim_movie = max(movie_sim_matrix[i], key=lambda x: movie_sim_matrix[i][x])
+                cond_movies.append(most_sim_movie)
+        if cond_movies is not None:
+            common_k = Counter(cond_movies).most_common(k)
+            finl_movies = [j[0] for j in common_k]
+            inter += len(list(set(target_movie).intersection(set(finl_movies))))  # 交集长度
+            all += len(finl_movies)
+    recall = inter / all
+    print("召回率：", recall)
 
 
 if __name__ == '__main__':
     rating_file = r"D:\data\ml-latest-small\ratings.csv"
-    # 候补电影数目
-    cond_movies_num = 20
+
     # 要推荐给用户的数目
-    rec_movies_num = 10
+    rec_movies_num = 100
 
     train_data, test_data = get_dataset(rating_file)
-    print(test_data)
-    import sys
-    sys.exit()
+
     movie_sim_matrix = cal_movie_sim(train_data)
-    evaluate(movie_sim_matrix, test_data)
+    evaluate(movie_sim_matrix, test_data, rec_movies_num)
