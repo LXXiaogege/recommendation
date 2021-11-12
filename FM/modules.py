@@ -30,16 +30,17 @@ class FM_layer(Layer):
         """
         因为这里inputs是sparse features ，embedding_lookup就等价于原文中用weight乘ont-hot向量了。
         （原文的目的其实就是embedding_lookup）
+        具体公式看论文
         """
         inputs = inputs + tf.convert_to_tensor(self.index_mapping)  # 先把inputs做成id形式，把所有特征混到一起看做一个整体
 
-        # first order
+        # first order = w0+ wx, w0是作为全局偏差，wx是原特征权重表示
         first_order = self.w0 + tf.reduce_sum(tf.nn.embedding_lookup(self.w, inputs), axis=1)  # (batch_size, 1)
-        # second order
+        # second order， 特征交叉后的特征表示，这里是degree为2的二阶特征交叉
         second_inputs = tf.nn.embedding_lookup(self.v, inputs)  # (batch_size, fields, embed_dim)
         square_sum = tf.square(tf.reduce_sum(second_inputs, axis=1, keepdims=True))  # (batch_size, 1, embed_dim)
         sum_square = tf.reduce_sum(tf.square(second_inputs), axis=1, keepdims=True)  # (batch_size, 1, embed_dim)
         second_order = 0.5 * tf.reduce_sum(square_sum - sum_square, axis=2)  # (batch_size, 1)
-        # outputs
+        # outputs = 偏差 + 原始特征 + 特征交叉后的特征
         outputs = first_order + second_order
         return outputs
