@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Layer, Dense,ReLU
+from tensorflow.keras.layers import Layer, Dense, ReLU
 
 
 class ResidualUnits(Layer):
@@ -15,5 +15,5 @@ class ResidualUnits(Layer):
     def call(self, inputs, *args, **kwargs):
         outputs = self.layer_0(inputs)
         outputs = self.layer_1(outputs)
-        outputs = self.relu(outputs)
+        outputs = self.relu(outputs + inputs)
         return outputs
