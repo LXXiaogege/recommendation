@@ -2,6 +2,7 @@ import pandas as pd
 import random
 import numpy as np
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 """
 movieLens ratings:
@@ -32,48 +33,58 @@ def create_dataset(file_path, threshold=2, k=100):
     :param k: 测试集正负样本比， 一个正样本对应k个负样本
     :return:
     """
+    print('数据预处理开始')
     data = pd.read_csv(file_path, sep='::', engine='python', names=['user', 'item', 'rate', 'time'])
     num_item = data['item'].max()
     num_user = data['user'].max()
-    train_data, test_data = train_test_split(data, test_size=0.2, random_state=2022)
-    train_pos_sample = train_data[train_data['rate'] > threshold].sort_values(['user', 'time'], ascending=True)
-    test_pos_sample = test_data[test_data['rate'] > threshold].sort_values(['user', 'time'], ascending=True)
+
+    pos_sample = data[data['rate'] > threshold].sort_values(['user', 'time'], ascending=True)
 
     train = [[], [], []]
+    val = [[], [], []]
     test = [[], [], []]
+    print('构造数据集')
     # train data
-    for user, df in train_pos_sample[['user', 'item']].groupby('user'):
+    for user, df in tqdm(pos_sample[['user', 'item']].groupby('user')):
         user_pos_list = list(df['item'])
         user_pos_num = len(user_pos_list)
-        train[0].extend([user for i in range(user_pos_num)])
-        train[1].extend(user_pos_list)
-        user_neg_list = [neg_sampling(user, user_pos_list, num_item) for i in range(user_pos_num)]
-        train[2].extend(user_neg_list)
-    # test data
-    for user, df in test_pos_sample[['user', 'item']].groupby('user'):
-        user_pos_list = list(df['item'])
-        user_pos_num = len(user_pos_list)
-        test[0].extend([user for i in range(user_pos_num)])
-        test[1].extend(user_pos_list)
-        user_neg_list = [[neg_sampling(user, user_pos_list, num_item) for j in range(k)] for i in range(user_pos_num)]
-        test[2].extend(user_neg_list)
-        break
+        if user_pos_num > 5:  # item太少不能构成训练集，验证集和测试集
 
+            neg_list = [neg_sampling(user, user_pos_list, num_item) for i in range(user_pos_num + k)]
+
+            train[0].extend(list(df['user'])[:-2])
+            train[1].extend(user_pos_list[:-2])
+            train[2].extend(neg_list[:-2 - k])
+
+            val[0].append(user)
+            val[1].append(user_pos_list[-2])
+            val[2].append(neg_list[-2 - k])
+
+            test[0].append(user)
+            test[1].append((user_pos_list[-1]))
+            test[2].extend([neg_list[user_pos_num:]])
+    print('数据集准备完成')
     # shuffle ,同时打乱多个list
     temp = list(zip(train[0], train[1], train[2]))
     random.shuffle(temp)
     train[0], train[1], train[2] = zip(*temp)
+
+    temp = list(zip(val[0], val[1], val[2]))
+    random.shuffle(temp)
+    val[0], val[1], val[2] = zip(*temp)
 
     temp = list(zip(test[0], test[1], test[2]))
     random.shuffle(temp)
     test[0], test[1], test[2] = zip(*temp)
 
     train = [np.array(train[0]), np.array(train[1]), np.array(train[2])]
+    val = [np.array(val[0], np.array([1]), np.array([2]))]
     test = [np.array((test[0])), np.array(test[1]), np.array(test[2])]
     feature_column = [sparse_feature(feat='user', feat_num=num_user),
                       sparse_feature(feat='item', feat_num=num_item)]
 
-    return feature_column, train, test
+    print('数据预处理结束')
+    return feature_column, train, val, test
 
 
 create_dataset('D:/data/ml-1m/ratings.dat', threshold=2, k=100)
