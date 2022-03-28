@@ -1,7 +1,6 @@
 import pandas as pd
 import random
 import numpy as np
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
 """
@@ -18,6 +17,7 @@ def dense_features():
     pass
 
 
+# 尽量少调用，否则效率很低
 def neg_sampling(user_id, pos_list, num_item):
     neg = random.randint(1, num_item)
     while neg in set(pos_list):
@@ -65,26 +65,26 @@ def create_dataset(file_path, threshold=2, k=100):
             test[2].extend([neg_list[user_pos_num:]])
     print('数据集准备完成')
     # shuffle ,同时打乱多个list
-    temp = list(zip(train[0], train[1], train[2]))
-    random.shuffle(temp)
-    train[0], train[1], train[2] = zip(*temp)
-
-    temp = list(zip(val[0], val[1], val[2]))
-    random.shuffle(temp)
-    val[0], val[1], val[2] = zip(*temp)
-
-    temp = list(zip(test[0], test[1], test[2]))
-    random.shuffle(temp)
-    test[0], test[1], test[2] = zip(*temp)
+    # temp = list(zip(train[0], train[1], train[2]))
+    # random.shuffle(temp)
+    # train[0], train[1], train[2] = zip(*temp)
+    #
+    # temp = list(zip(val[0], val[1], val[2]))
+    # random.shuffle(temp)
+    # val[0], val[1], val[2] = zip(*temp)
+    #
+    # temp = list(zip(test[0], test[1], test[2]))
+    # random.shuffle(temp)
+    # test[0], test[1], test[2] = zip(*temp)
 
     train = [np.array(train[0]), np.array(train[1]), np.array(train[2])]
-    val = [np.array(val[0], np.array([1]), np.array([2]))]
+    val = [np.array(val[0]), np.array(val[1]), np.array(val[2])]
     test = [np.array((test[0])), np.array(test[1]), np.array(test[2])]
-    feature_column = [sparse_feature(feat='user', feat_num=num_user),
-                      sparse_feature(feat='item', feat_num=num_item)]
+    feature_column = [sparse_feature(feat='user', feat_num=num_user + 1),
+                      sparse_feature(feat='item', feat_num=num_item + 1)]
 
     print('数据预处理结束')
     return feature_column, train, val, test
 
 
-create_dataset('D:/data/ml-1m/ratings.dat', threshold=2, k=100)
+# create_dataset('D:/data/ml-1m/ratings.dat', threshold=2, k=100)

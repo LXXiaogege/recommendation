@@ -11,7 +11,7 @@ class BPR(Model):
     """
 
     def __init__(self, feat_column, embed_reg=1e-6):
-        super(Model).__init__()
+        super(BPR, self).__init__()
         self.user_sparse_feat, self.item_sparse_feat = feat_column
         self.user_embedding = Embedding(input_dim=self.user_sparse_feat['feat_num'],
                                         output_dim=self.user_sparse_feat['embed_dim'],
@@ -29,14 +29,14 @@ class BPR(Model):
         # ???
         self.mode = 'inner'
 
-    def call(self, inputs, training=None, mask=None):
+    def call(self, inputs, **kwargs):
         user, item_i, item_j = inputs
         user_embed = self.user_embedding(user)
         item_i_embed = self.item_embedding(item_i)
         item_j_embed = self.item_embedding(item_j)
 
         pos_scores = tf.reduce_sum(tf.multiply(user_embed, item_i_embed), axis=-1)
-        neg_scores = tf.reduce_sum(tf.multiply(user_embed, item_i_embed), axis=-1)
+        neg_scores = tf.reduce_sum(tf.multiply(user_embed, item_j_embed), axis=-1)
 
         self.add_loss(tf.reduce_mean(-tf.math.log(tf.nn.sigmoid(pos_scores - neg_scores))))
 
