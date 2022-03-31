@@ -26,7 +26,7 @@ def create_criteo_dataset(file, embed_dim=8, read_part=True, sample_num=100000, 
         tfr = pd.read_csv(file, sep='\t', header=None, iterator=True, names=names)
         data = tfr.get_chunk(sample_num)
     else:
-        data = pd.read_csv(file, sep='\t', header=None, names=names)
+        data = pd.read_csv(file, sep=',', header=None, names=names)
 
     continue_features = ['I' + str(i) for i in range(1, 14)]  # 连续特征
     sparse_features = ['C' + str(i) for i in range(1, 27)]  # 离散特征
@@ -37,6 +37,7 @@ def create_criteo_dataset(file, embed_dim=8, read_part=True, sample_num=100000, 
     data[sparse_features] = data[sparse_features].fillna('-1')  # 要填成字符类型确保为离散数据，如果填成int，后面则无法对他编码
 
     # 连续特征离散化(分箱),n_bins：离散后的桶个数，encode:编码方式，strategy:分箱的策略
+    # 也可以不离散化，两种处理方式：1 、离散化跟离散特征一起hot-hot处理。 2、不处理，直接使用原生的连续值
     est = KBinsDiscretizer(n_bins=100, encode='ordinal', strategy='uniform')
     data[continue_features] = est.fit_transform(data[continue_features])
 
