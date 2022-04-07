@@ -13,7 +13,9 @@ class DeepFM(Model):
             Embedding(input_dim=feat['feat_num'], output_dim=feat['embed_dim'], embeddings_initializer='uniform',
                       embeddings_regularizer=None, input_length=1) for feat in self.features_column_list]
         self.feat_len = 0
+        self.index_mapping = []
         for feat in self.features_column_list:
+            self.index_mapping.append(self.feat_len)
             self.feat_len += feat['feat_num']
         self.FM = FM(self.feat_len)
         self.Deep = Deep(hidden_units=hidden_units)
@@ -27,6 +29,7 @@ class DeepFM(Model):
             [self.features_embedding_list[i](sparse_features[:, i]) for i in range(sparse_features.shape[1])], axis=-1)
 
         # FM ， 数据经过FM得到的标量表示 y1.shape： batch，1
+        sparse_features = sparse_features + tf.convert_to_tensor(self.index_mapping)
         y1 = self.FM((sparse_features,
                       tf.reshape(sparse_features_embed,
                                  shape=(-1, sparse_features.shape[1], self.features_column_list[0]['embed_dim']))))
