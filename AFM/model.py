@@ -1,14 +1,15 @@
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Embedding, Dense
 from modules import FM, Attention
 import tensorflow as tf
 
 
 class AFM(Model):
-    def __init__(self, feature_column, k):
+    def __init__(self, feature_column, k, mode='fm'):
         super(AFM, self).__init__()
         self.sparse_feat_col = feature_column
+        self.mode = mode
         self.embedding_list = [
             Embedding(input_dim=feat['feat_num'], output_dim=feat['embed_dim'], embeddings_initializer='random_normal',
                       embeddings_regularizer=l2(1e-6), input_length=1) for feat in self.sparse_feat_col]
@@ -18,6 +19,7 @@ class AFM(Model):
             self.index_mapping.append(self.feat_len)
             self.feat_len += feat['feat_num']
         self.fm = FM(self.feat_len)
+        self.fm_dense_p = Dense(1)
 
         self.attention = Attention(k)
 
@@ -31,9 +33,11 @@ class AFM(Model):
         sparse_feat = sparse_feat + tf.convert_to_tensor(self.index_mapping)
         # Pair-wise Interaction Layer
         first_order, second_order = self.fm((embed_list, sparse_feat))
-
+        if self.mode is 'fm':
+            second_order = self.fm_dense_p(tf.reduce_sum(second_order, axis=1))
+            y = tf.sigmoid(self.bias + first_order + second_order)
+            return y
         # Attention Layer
         attention_outputs = self.attention(second_order)
-
         y = tf.sigmoid(self.bias + first_order + attention_outputs)
         return y
