@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Embedding, Conv2D, ZeroPadding2D, Dense, Fla
 from tensorflow.keras.initializers import RandomNormal
 import tensorflow as tf
 from modules import KMaxPooling
-from tensorflow.keras.activations import relu, softmax
+from tensorflow.keras.activations import relu,sigmoid
 
 
 class CCPM(Model):
@@ -37,7 +37,7 @@ class CCPM(Model):
                           for i in range(self.conv_len)]
 
         self.flatten = Flatten()
-        self.dense = Dense(units=1)
+        self.dense = Dense(units=1, activation=sigmoid)
 
     def call(self, inputs, training=None, mask=None):
         # batch,feat_num
@@ -55,5 +55,4 @@ class CCPM(Model):
             s = self.max_pooling_list[i](r)
             s = relu(s)
         outputs = self.dense(self.flatten(s))
-        outputs = softmax(outputs)
         return outputs
