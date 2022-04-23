@@ -10,3 +10,5 @@ tqdm==4.62.0
 scikit-learn~=0.24.2
 scipy~=1.5.4
 seaborn~=0.11.2
+deepctr~=0.9.0
+joblib~=1.1.0
