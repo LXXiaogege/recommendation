@@ -1,14 +1,13 @@
-lightgbm==3.2.1
-matplotlib==3.3.4
-numpy==1.19.2
-pandas==1.1.5
-progressbar33==2.4
-scikit_learn==1.0.1
-tensorflow==2.5.0
-tqdm==4.62.0
+lightgbm
+matplotlib
+numpy
+pandas
+progressbar33
+scikit_learn
+tensorflow=2.5
+tqdm
 
-scikit-learn~=0.24.2
-scipy~=1.5.4
-seaborn~=0.11.2
-deepctr~=0.9.0
-joblib~=1.1.0
+scipy
+seaborn
+deepctr
+joblib
