@@ -1,7 +1,7 @@
 lightgbm
 matplotlib
 numpy
-pandas
+pandas=1.4.2
 progressbar33
 scikit_learn
 tensorflow=2.5
@@ -10,4 +10,4 @@ tqdm
 scipy
 seaborn
 deepctr
-joblib
+joblib=1.1.0
