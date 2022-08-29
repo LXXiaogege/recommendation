@@ -19,10 +19,10 @@ class AutoRec(Model):
     def call(self, inputs, training=None, mask=None):
         """
 
-        :param inputs: 所有用户对item i 的评分
+        :param inputs: 所有用户对item i 的评分/该用户对所有items的评分
         :param mask:
-        :param training:
-        :return: 对所有用户对item i评分的预测分数
+        :param training: 是否在训练
+        :return: 对所有用户对item i评分的预测分数/该用户对所有items的预测分数
         """
         hidden = self.dropout(self.encoder(inputs))
         output = self.decoder(hidden)

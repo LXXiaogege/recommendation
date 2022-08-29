@@ -5,12 +5,11 @@ import numpy as np
 
 
 # auto encoder  rec data preprocess
-def parse_ratings(root_path, sampling='random', mode='user-based'):
+def parse_ratings(root_path,  mode='user-based'):
     """
 
     :param root_path: movieLens数据集根目录
     :param mode: 基于物品/用户 构建数据集,  user-based/item-based
-    :param sampling: random / timestamp based
     :return:
     """
     path = os.path.join(root_path, 'ratings.dat')
