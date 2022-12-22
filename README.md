@@ -1,10 +1,10 @@
-# newsRec(不如叫RecLearn,之后会改名，目前还没怎么实现新闻推荐算法，日后会更新DKN，LSTUR，NAML等模型)
+# Recommendation Model Algorithm
 
-#### 介绍
-推荐系统排序模型
+#### Introduce
+
 
 #### 
-基于Tensorflow2.0实现
+基于Tensorflow2.5实现（后续会更新到最新版,后续可能也会穿插pytorch代码）
 python>=3.6
 
 
@@ -26,13 +26,3 @@ python>=3.6
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
